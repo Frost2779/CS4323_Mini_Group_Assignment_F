@@ -1,5 +1,5 @@
-#ifndef UNTITLED_ENCRYPTION_H
-#define UNTITLED_ENCRYPTION_H
+#ifndef ENCRYPTION_H
+#define ENCRYPTION_H
 
 /*
  * Encrypts a string with the given key.
@@ -21,4 +21,4 @@ char* encrypt(const char* str, int key);
  */
 char* decrypt(const char* str, int key);
 
-#endif
+#endif //ENCRYPTION_H

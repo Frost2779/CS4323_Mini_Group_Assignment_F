@@ -4,7 +4,6 @@
 #define ADDRESS "127.0.0.1"
 #define PORT 8080
 #define MAX_TCP_BUFFER_SIZE 8192
-#define TERMINATION_COMMAND "|exit|"
 
 struct socket_t {
     const int socketFD;
