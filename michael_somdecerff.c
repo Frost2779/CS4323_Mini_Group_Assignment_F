@@ -1,5 +1,5 @@
 #include <assert.h>
-#include <stdbool.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -23,13 +23,13 @@ struct messagePair_t {
     int key;
 };
 
-pthread_t pThreadId = -1;
-pthread_mutex_t dataListLock;
-struct linkedList_t* dataList;
+static pthread_t pThreadId = -1;
+static pthread_mutex_t dataListLock;
+static struct linkedList_t* dataList;
 
 void sendSentence(const char* sentence) {
     struct messagePair_t* message = malloc(sizeof(struct messagePair_t));
-    message->key = rand();
+    message->key = 13;//rand();
     message->sentence = encrypt(sentence, message->key);
 
     pthread_mutex_lock(&dataListLock);
@@ -43,27 +43,31 @@ static _Noreturn void* threadLoop(void* data) {
     struct socket_t* socket = createSocket(ADDRESS, PORT);
     connectSocket(socket, 5, 2);
 
+    dataList = mallocLinkedList();
+
     while(1) {
         sleep(1);
 
         pthread_mutex_lock(&dataListLock);
-        if(dataList->count == 0) continue;
+        if(dataList->count == 0) {
+            pthread_mutex_unlock(&dataListLock);
+            continue;
+        }
 
         for(int i = 0; i < dataList->count; i++) {
             struct messagePair_t* message = linkedListPop(dataList);
             char buffer[MAX_TCP_BUFFER_SIZE];
 
-            sprintf(buffer, "%d|%s", message->key, message->sentence);
+            sprintf(buffer, "%d|%s\n", message->key, message->sentence);
             writeSocket(socket, buffer);
 
             bzero(buffer, MAX_TCP_BUFFER_SIZE);
             readSocket(socket, buffer);
-            printf("Sentence file name: %s", buffer);
+            printf("Sentence file name: %s\n", buffer);
 
             free(message);
         }
         pthread_mutex_unlock(&dataListLock);
-
         // Sleeping the thread in here somewhere
     }
 }
@@ -74,16 +78,14 @@ pthread_t createClientThread() {
         exit(1);
     }
 
-    if (pthread_mutex_init(&dataListLock, NULL) != 0) {
-        printf("[createClientThread] mutex lock init failed\n");
-        return 1;
+    pthread_t threadId;
+    if(pthread_create(&threadId, NULL, threadLoop, NULL) != 0) {
+        printf("[createClientThread] Error on thread creation, %d\n", errno);
+        exit(1);
     }
 
-    pthread_t threadId;
-    pthread_create(&threadId, NULL, threadLoop, NULL);
-
-    if(threadId != 0) {
-        printf("[createClientThread] Error on thread creation\n");
+    if (pthread_mutex_init(&dataListLock, NULL) != 0) {
+        printf("[createClientThread] mutex lock init failed\n");
         exit(1);
     }
 
@@ -259,7 +261,6 @@ void bindSocket(const struct socket_t* socket) {
     assert(socket != NULL);
 
     struct sockaddr_in serverAddress = addressAndPort(socket->address, socket->port);
-
     if(bind(socket->socketFD, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) != 0) {
         printf("[bindSocket] failed to bind to port\n");
         exit(1);
