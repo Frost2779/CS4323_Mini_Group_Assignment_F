@@ -13,7 +13,8 @@ struct socket_t {
 
 struct socket_t* createSocket(const char* address, int port);
 void bindSocket(const struct socket_t* socket);
-struct socket_t* listenAcceptSocket(const struct socket_t* socket);
+void listenSocket(const struct socket_t* socket, int listenCount);
+struct socket_t* acceptSocket(const struct socket_t* socket);
 void connectSocket(const struct socket_t* socket, int maxRetryAttempt, int backoffFactor);
 void readSocket(const struct socket_t* socket, char* buffer);
 void writeSocket(const struct socket_t* socket, char* buffer);

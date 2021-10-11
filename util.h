@@ -12,5 +12,6 @@
  *     A char pointer to the first element of the string
  * */
 char* mallocString(unsigned int length);
+struct sockaddr_in addressAndPort(const char* address, int port);
 
 #endif //UNTITLED_UTIL_H

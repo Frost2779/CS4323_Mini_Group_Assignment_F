@@ -1,2 +1,2 @@
 all:
-	gcc ./*.c -o mini_project.out
+	gcc ./*.c -o mini_project.out -pthread
