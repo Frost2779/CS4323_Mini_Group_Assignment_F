@@ -29,7 +29,7 @@ static struct linkedList_t* dataList;
 
 void sendSentence(const char* sentence) {
     struct messagePair_t* message = malloc(sizeof(struct messagePair_t));
-    message->key = 13;//rand();
+    message->key = rand();
     message->sentence = encrypt(sentence, message->key);
 
     pthread_mutex_lock(&dataListLock);
@@ -58,9 +58,17 @@ static _Noreturn void* threadLoop(void* data) {
             struct messagePair_t* message = linkedListPop(dataList);
             char buffer[MAX_TCP_BUFFER_SIZE];
 
-            sprintf(buffer, "%d|%s\n", message->key, message->sentence);
+            // Send key
+            sprintf(buffer, "%d\n", message->key);
             writeSocket(socket, buffer);
 
+            bzero(buffer, MAX_TCP_BUFFER_SIZE);
+
+            // Send sentence
+            sprintf(buffer, "%s", message->sentence);
+            writeSocket(socket, buffer);
+
+            // Receive the file name
             bzero(buffer, MAX_TCP_BUFFER_SIZE);
             readSocket(socket, buffer);
             printf("Sentence file name: %s\n", buffer);
@@ -130,6 +138,7 @@ void* linkedListPop(struct linkedList_t* list) {
     assert(list != NULL);
 
     if(list->count == 0) {
+        // No idea what standard practice is here. I know returning null is almost always a bad idea
         return NULL;
     }
 
@@ -140,6 +149,7 @@ void* linkedListPop(struct linkedList_t* list) {
         list->head = NULL;
         list->tail = NULL;
     }
+    // More than 1 element in the list
     else {
         struct node_t* head = list->head;
         list->head = list->head->next;
@@ -238,9 +248,8 @@ char* decrypt(const char* str, int key) {
 // socketConnection.h
 //
 /////////////////////////////////////////////////////
-/*
- * Creates a socket wrapper about C-style socket int
- */
+#define MILLISECONDS_PER_SECOND 1000
+
 struct socket_t* createSocket(const char* address, int port) {
     struct socket_t* created = malloc(sizeof(struct socket_t));
 
@@ -294,20 +303,20 @@ struct socket_t* acceptSocket(const struct socket_t* socket) {
     return clientSocket;
 }
 
-void connectSocket(const struct socket_t* socket, int maxRetryAttempt, int backoffFactor) {
+void connectSocket(const struct socket_t* socket, int maxRetryAttempt, float backoffFactor) {
     assert(socket != NULL);
     assert(maxRetryAttempt >= 0);
     assert(backoffFactor >= 0);
 
     struct sockaddr_in serverAddress = addressAndPort(socket->address, socket->port);
 
-    for(int i = 0; i < maxRetryAttempt; i++) {
+    for(int i = 0; i < maxRetryAttempt + 1; i++) {
         printf("Connecting to TCP server. Attempt %d...\n", i + 1);
         if (connect(socket->socketFD, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) != 0) {
-            if(i != maxRetryAttempt - 1) {
-                int backoff = backoffFactor * (i + 1);
-                printf("Failed to connect, backoff waiting %d seconds\n", backoff);
-                sleep(backoff);
+            if(i != maxRetryAttempt) {
+                float backoff = backoffFactor * (i + 1);
+                printf("Failed to connect, backoff waiting %.2f seconds\n", backoff);
+                usleep(MILLISECONDS_PER_SECOND * backoff);
                 continue;
             }
             else {
@@ -375,4 +384,8 @@ struct sockaddr_in addressAndPort(const char* address, int port) {
     socketAddress.sin_port = htons(port);
 
     return socketAddress;
+}
+
+void seedRand() {
+    srand(time(NULL));
 }

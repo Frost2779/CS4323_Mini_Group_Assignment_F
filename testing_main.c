@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include "clientThread.h"
 #include "socketConnection.h"
+#include "util.h"
 
 _Noreturn void* serverListen(void* data) {
     struct socket_t* tcpSocket = createSocket(ADDRESS, PORT);
@@ -15,7 +16,11 @@ _Noreturn void* serverListen(void* data) {
     while(1) {
         char buffer[MAX_TCP_BUFFER_SIZE];
         readSocket(acceptedClient, buffer);
-        printf("Received: %s\n", buffer);
+        printf("Received key: %s\n", buffer);
+
+        bzero(buffer, MAX_TCP_BUFFER_SIZE);
+        readSocket(acceptedClient, buffer);
+        printf("Received sentence: %s\n", buffer);
 
         sprintf(buffer, "%d", rand());
         writeSocket(acceptedClient, buffer);
@@ -23,6 +28,8 @@ _Noreturn void* serverListen(void* data) {
 }
 
 int main() {
+    seedRand();
+
     pthread_t threadId;
     pthread_create(&threadId, NULL, serverListen, NULL);
     createClientThread();

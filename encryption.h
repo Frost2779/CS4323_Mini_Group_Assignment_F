@@ -4,18 +4,20 @@
 /*
  * Encrypts a string with the given key.
  *
- * Paramters:
+ * Parameters:
  *     str -> the string to encrypt
- *     key ->
+ *     key -> the key to encrypt the string with
  * Returns:
  *     A char pointer to the first element of the string
  */
 char* encrypt(const char* str, int key);
+
 /*
  * Decrypts and encrypted string using the given key.
  *
- * Paramters:
- *     length -> the desired length of the string
+ * Parameters:
+ *     str -> the string to decrypt
+ *     key -> the key to decrypt the string with
  * Returns:
  *     A char pointer to the first element of the string
  */
