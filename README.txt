@@ -7,4 +7,4 @@ make
 
 ---Manual---
 If for some reason that make is not working, you can compile it manually with the following command:
-gcc ./*.c -o mini_project
+gcc ./*.c -o mini_project -pthread
