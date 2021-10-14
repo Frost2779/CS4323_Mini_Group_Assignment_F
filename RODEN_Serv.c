@@ -8,18 +8,11 @@
 #include <pthread.h>
 #include <stdbool.h>
 #include "socketConnection.h"
+#include "michael_somdecerff.c"
 
 
 #define maxClients 3
 #define maxThreads 3
-
-/********************
-A node struct for a linked list. Data Segment contains client Sockets.
-********************/
-typedef struct {
-    struct node* ptrNextNode;
-    int clientSock;
-} node;
 
 
 
