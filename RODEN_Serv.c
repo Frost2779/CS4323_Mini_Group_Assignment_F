@@ -62,9 +62,9 @@ void * threadTask(void *arg) {
         //Entering critical section, locking thread 
         pthread_mutex_lock(&queLock);
 
-        if(numClients > 0) {
+        /* if(numClients > 0) {
             isQueEmpty = false;
-        }
+        } */
 
 
         //unlocking
