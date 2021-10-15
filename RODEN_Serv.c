@@ -8,18 +8,19 @@
 #include <pthread.h>
 #include <stdbool.h>
 #include "socketConnection.h"
-//#include "michael_somdecerff.c"
-
+#include "linkedList.h"
 
 #define maxClients 3
 #define maxThreads 3
-
-
 
 /*Thread Pool Vars*/
 pthread_t poolOfThreads[maxThreads];
 pthread_cond_t threadConditional = PTHREAD_COND_INITIALIZER;
 pthread_mutex_t queLock = PTHREAD_MUTEX_INITIALIZER;
+
+//create a linked list to store client connections, needs to be
+// global since threads share data segment.
+struct linkedList_t* clientQue = mallocLinkedList();
 
 
 /********************
@@ -39,40 +40,27 @@ Return Type: void
 //CODE
 
 /********************
-Function: addClientToQue()
-Purpose:  add client to threadpool to handle.
-Return Type: void 
-********************/
-void addClientToQue() {
-    pthread_mutex_lock(&queLock);
-
-}
-
-
-/********************
 Function: threadTask()
 Purpose:  function that each thread in the thread pool will be executing.
 Return Type: void 
 ********************/
 void * threadTask(void *arg) {
     while(1) {
-        //int *clientSock;
-        bool isQueEmpty = true;
+        //What needs to happen:
 
-        //Entering critical section, locking thread 
-        pthread_mutex_lock(&queLock);
+        // turn on mutex lock //
 
-        /* if(numClients > 0) {
-            isQueEmpty = false;
-        } */
+        // if client que is empty, then wait with conditional //
 
+        // get client Socket //
 
-        //unlocking
-        pthread_mutex_unlock(&queLock);
-        //EXECUTE HANDLING OF CLIENT
-        if(!isQueEmpty) {
-            //execute function call
-        }
+        // unlock mutex //
+
+        // recieve from client what thread will be doing //
+
+        // 1. recieve an encrypted message, store into a file, then send back the filename and key
+        // 2. recieve a file name and send back an encrypted message.
+
     }
     return NULL;
 }
@@ -125,17 +113,11 @@ int main() {
         }
 
         //Once a client connects, pass it to a thread from the threadpool
-        pthread_mutex_lock(&queLock); //
-        
-        //ADD Client to cue
-
-        pthread_cond_signal(&threadConditional);
-        pthread_mutex_unlock(&queLock);
-
-
+        pthread_mutex_lock(&queLock);              //lock que to prevent race condition
+        linkedListAppend(clientQue, &clientSock);  //ADD client's socket to the que
+        pthread_cond_signal(&threadConditional);   //signal a thread to work
+        pthread_mutex_unlock(&queLock);            //unlock client que
     }
-
-
     return 0;
 }
 */
