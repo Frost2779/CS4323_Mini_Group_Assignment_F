@@ -20,7 +20,7 @@ pthread_mutex_t queLock = PTHREAD_MUTEX_INITIALIZER;
 
 //create a linked list to store client connections, needs to be
 // global since threads share data segment.
-struct linkedList_t* clientQue = mallocLinkedList();
+static struct linkedList_t* clientQue;
 
 
 /********************
@@ -71,6 +71,8 @@ int main() {
     struct sockaddr_in serverAddress;
     struct sockaddr_in clientAddress;
     int clientLength, servSock, clientSock;
+
+    clientQue = mallocLinkedList();
 
     //Creating threads in the poolOfThreads array
     for(int i = 0; i < maxThreads; i++) {
