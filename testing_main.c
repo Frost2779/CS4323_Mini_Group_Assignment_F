@@ -10,20 +10,30 @@
 _Noreturn void* serverListen(void* data) {
     struct socket_t* tcpSocket = createSocket(ADDRESS, PORT);
     bindSocket(tcpSocket);
-    listenSocket(tcpSocket, 1);
-    struct socket_t* acceptedClient = acceptSocket(tcpSocket);
+    listenSocket(tcpSocket, 2);
 
     while(1) {
-        char buffer[MAX_TCP_BUFFER_SIZE];
-        readSocket(acceptedClient, buffer);
-        printf("Received key: %s\n", buffer);
+        struct socket_t* acceptedClient = acceptSocket(tcpSocket);
 
-        bzero(buffer, MAX_TCP_BUFFER_SIZE);
-        readSocket(acceptedClient, buffer);
-        printf("Received sentence: %s\n", buffer);
+        while(1) {
+            char buffer[MAX_TCP_BUFFER_SIZE];
+            readSocket(acceptedClient, buffer);
 
-        sprintf(buffer, "%d", rand());
-        writeSocket(acceptedClient, buffer);
+            if(strstr(buffer, "|exit|") != NULL) {
+                printf("Client has closed the socket\n");
+                freeSocket(acceptedClient);
+                break;
+            }
+
+            printf("Received key: %s\n", buffer);
+
+            bzero(buffer, MAX_TCP_BUFFER_SIZE);
+            readSocket(acceptedClient, buffer);
+            printf("Received sentence: %s\n", buffer);
+
+            sprintf(buffer, "%d", rand());
+            writeSocket(acceptedClient, buffer);
+        }
     }
 }
 
@@ -40,6 +50,7 @@ int main() {
         char buffer[50];
         printf("Input> ");
         fgets(buffer, 50, stdin);
+        // Strip the new line that fgets grabs
         buffer[strcspn(buffer, "\n")] = 0;
         printf("typed: '%s'\n", buffer);
         sendSentence(buffer);

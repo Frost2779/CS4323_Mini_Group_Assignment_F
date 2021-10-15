@@ -13,6 +13,82 @@
 #include "socketConnection.h"
 #include "util.h"
 
+#define SOCKET_EXIT "|exit|"
+#define ERROR_MSG "ERROR"
+#define RETRIEVE_FILE_COMMAND "|retrieve_file|"
+#define SAVE_FILE_COMMAND "|save_file|"
+
+/////////////////////////////////////////////////////
+//
+// HandleClientTraffic.h
+//
+/////////////////////////////////////////////////////
+void handleClientTraffic(int socketFD) {
+    struct socket_t* socket = malloc(sizeof(struct socket_t));
+    *(int*)&socket->socketFD = socketFD;
+
+    char buffer[MAX_TCP_BUFFER_SIZE];
+
+    bzero(buffer, MAX_TCP_BUFFER_SIZE);
+    readSocket(socket, buffer);
+
+    if(strstr(buffer, RETRIEVE_FILE_COMMAND) != NULL) {
+        // Get the file
+    }
+    else if(strstr(buffer, SAVE_FILE_COMMAND) != NULL) {
+        // Read the key and sentence and save as a file
+    }
+
+    freeSocket(socket);
+}
+
+/////////////////////////////////////////////////////
+//
+// RetrieveFile.h
+//
+/////////////////////////////////////////////////////
+void retrieveFile(const char* fileName) {
+    assert(fileName != NULL);
+
+    struct socket_t* socket = createSocket(ADDRESS, PORT);
+    connectSocket(socket, 5, 2);
+
+    char buffer[MAX_TCP_BUFFER_SIZE];
+
+    // Write command
+    bzero(buffer, MAX_TCP_BUFFER_SIZE);
+    sprintf(buffer, "%s", RETRIEVE_FILE_COMMAND);
+    writeSocket(socket, buffer);
+
+    // Write the file name
+    bzero(buffer, MAX_TCP_BUFFER_SIZE);
+    sprintf(buffer, "%s", fileName);
+    writeSocket(socket, buffer);
+
+    // Read the key
+    bzero(buffer, MAX_TCP_BUFFER_SIZE);
+    readSocket(socket, buffer);
+
+    // Check if there was an error on the server
+    if(strstr(buffer, ERROR_MSG) != NULL) {
+        printf("Specified file '%s' does not exist\n", fileName);
+        exit(1);
+    }
+
+    // parse the key to int
+    int key = atoi(buffer);
+
+    // Read the sentence
+    bzero(buffer, MAX_TCP_BUFFER_SIZE);
+    readSocket(socket, buffer);
+
+    // print file contents
+    char* decrypted = decrypt(buffer, key);
+    printf("Received file for name '%s':%s\n", fileName, decrypted);
+    free(decrypted);
+}
+
+
 /////////////////////////////////////////////////////
 //
 // ClientThread.h
@@ -40,13 +116,11 @@ void sendSentence(const char* sentence) {
 }
 
 static _Noreturn void* threadLoop(void* data) {
-    struct socket_t* socket = createSocket(ADDRESS, PORT);
-    connectSocket(socket, 5, 2);
-
     dataList = mallocLinkedList();
 
     while(1) {
-        sleep(1);
+        sleep(10);
+        // The thread will wake up here
 
         pthread_mutex_lock(&dataListLock);
         if(dataList->count == 0) {
@@ -54,17 +128,27 @@ static _Noreturn void* threadLoop(void* data) {
             continue;
         }
 
+
+        struct socket_t* socket = createSocket(ADDRESS, PORT);
+        connectSocket(socket, 5, 2);
+
+        char buffer[MAX_TCP_BUFFER_SIZE];
+
+        // Write command
+        bzero(buffer, MAX_TCP_BUFFER_SIZE);
+        sprintf(buffer, "%s", SAVE_FILE_COMMAND);
+        writeSocket(socket, buffer);
+
         for(int i = 0; i < dataList->count; i++) {
             struct messagePair_t* message = linkedListPop(dataList);
-            char buffer[MAX_TCP_BUFFER_SIZE];
 
             // Send key
-            sprintf(buffer, "%d\n", message->key);
+            bzero(buffer, MAX_TCP_BUFFER_SIZE);
+            sprintf(buffer, "%d", message->key);
             writeSocket(socket, buffer);
 
-            bzero(buffer, MAX_TCP_BUFFER_SIZE);
-
             // Send sentence
+            bzero(buffer, MAX_TCP_BUFFER_SIZE);
             sprintf(buffer, "%s", message->sentence);
             writeSocket(socket, buffer);
 
@@ -73,8 +157,16 @@ static _Noreturn void* threadLoop(void* data) {
             readSocket(socket, buffer);
             printf("Sentence file name: %s\n", buffer);
 
+            free(message->sentence);
             free(message);
         }
+
+        // Send exit message to the server to close the socket
+        bzero(buffer, MAX_TCP_BUFFER_SIZE);
+        sprintf(buffer, "%s", SOCKET_EXIT);
+        writeSocket(socket, buffer);
+
+        freeSocket(socket);
         pthread_mutex_unlock(&dataListLock);
         // Sleeping the thread in here somewhere
     }
