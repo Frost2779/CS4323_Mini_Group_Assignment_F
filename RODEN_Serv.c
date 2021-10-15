@@ -8,7 +8,7 @@
 #include <pthread.h>
 #include <stdbool.h>
 #include "socketConnection.h"
-#include "michael_somdecerff.c"
+//#include "michael_somdecerff.c"
 
 
 #define maxClients 3
@@ -77,9 +77,9 @@ void * threadTask(void *arg) {
     return NULL;
 }
 
-
+/*
 int main() {
-    /*Server Vars*/
+    //Server Vars
     struct sockaddr_in serverAddress;
     struct sockaddr_in clientAddress;
     int clientLength, servSock, clientSock;
@@ -138,4 +138,4 @@ int main() {
 
     return 0;
 }
-
+*/
