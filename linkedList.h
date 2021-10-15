@@ -45,7 +45,7 @@ void linkedListAppend(struct linkedList_t* list, void* data);
  * Parameters:
  *     list -> the linked list to remove the head of
  * Returns:
- *     Returns a pointer to the data that was contained within the
+ *     A pointer to the data that was contained within the
  *     head node if the list isn't empty. Returns NULL otherwise
  */
 void* linkedListPop(struct linkedList_t* list);

@@ -6,7 +6,6 @@
 
 //This keeps throwing a segmentation fault, currently trying to get that figured out.
 
-
 char* pA(){
 
         char sentence[1000];
@@ -83,6 +82,7 @@ char* pB(char* sentence){
         return wrongWordsR;
 }
 
+/*
 int main(){
 
         char* sentence = pA();
@@ -92,3 +92,4 @@ int main(){
 
         return 0;
 }
+*/

@@ -3,7 +3,7 @@ this code is verbatim from the video and needs to be modified!!
 
 Roden_Serv.c will be my working file I plan to use*/
 
-
+/*
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,8 +12,7 @@ Roden_Serv.c will be my working file I plan to use*/
 #include <arpa/inet.h>
 #include <stdbool.h>
 #include <pthread.h>
-#include "myqueue.c"
-
+//#include "myqueue.c"
 
 #define PATH_MAX 4096
 #define SERVERPORT 8989
@@ -33,6 +32,7 @@ typedef struct sockaddr SA;
 void * handle_connection(void* p_client_socket);
 int check(int exp, const char *msg);
 void * thread_function(void *arg);
+
 
 int main() {
     int server_socket, client_socket, addr_size;
@@ -77,6 +77,7 @@ int main() {
     }
 
 }
+
 
 int check(int exp, const char *msg) {
     if (exp == SOCKETERROR) {
@@ -152,3 +153,4 @@ void * handle_connection(void* p_client_socket) {
     printf("closing connection\n");
     return NULL;
 }
+  */

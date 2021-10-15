@@ -4,6 +4,7 @@
 
 #include <string.h>
 
+/*
 int main(){
    //the fd arrays are just how the write and read descripters are stored into and the difference of arrays makes different pipes
    int fd[2];
@@ -75,3 +76,4 @@ int main(){
 
 return 0;
 }
+*/

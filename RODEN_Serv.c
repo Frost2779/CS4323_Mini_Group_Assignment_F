@@ -65,9 +65,9 @@ void * threadTask(void *arg) {
     return NULL;
 }
 
-
+/*
 int main() {
-    /*Server Vars*/
+    //Server Vars
     struct sockaddr_in serverAddress;
     struct sockaddr_in clientAddress;
     int clientLength, servSock, clientSock;
@@ -120,4 +120,4 @@ int main() {
     }
     return 0;
 }
-
+*/
