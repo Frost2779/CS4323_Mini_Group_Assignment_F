@@ -21,6 +21,7 @@ int pB(char* sentence){
         int spacefound = 0;
         //location in the sentence where the word is locatated
         int wordlocation = 0;
+        int templen;
         memset(word, 0, sizeof(word));
         //loop to run through the entire string. it will parse and check to make sure the word is valid
         for(int i = 0; i < stringL-1; i++){
@@ -28,17 +29,18 @@ int pB(char* sentence){
         	if(sentence[i] == ' '){
         	//printf("word check");
         	spacefound = 1;
-        	   //ok this line 90% works. it gets the next string in the file but because when i set the length to something long to get everything it made the strcmps not work right when using two variables. i could check the variable check that held "hello" against the string "hello" and it work but if word was used instead of the literal "hello" it would break and this went both ways. checking the variable word on the literal string "hello" worked fine. with this a word such as "helo" will be accepted because it only takes in the size of the word from the file so the word "helots" will only take in "helo" and pass it. this so far is the only major issue and its only on certain cases where the word has to be misspelled to be the start of another word. 
-        	   fgets(check, strlen(word)+1, wordBank);
+        	   //ok this line 90% works. it gets the next string in the file but because when i set the length to something long to get everything it made the strcmps not work right when using two variables. i could check the variable check that held "hello" against the string "hello" and it work but if word was used instead of the literal "hello" it would break and this went both ways. checking the variable word on the literal string "hello" worked fine. with this a word such as "helo" will be accepted because it only takes in the size of the word from the file so the word "helots" will only take in "helo" and pass it. this so far is the only major issue and its only on certain cases where the word has to be misspelled to be the start of another word. NOTE OF FIX - using fscanf as opposed to fgets now works so the issue is resovled and the code works fine now. i will delete this paragraph and just leave a normal explanation later into the week to avoid clutter.
+        	   fscanf(wordBank, "%s", check);
         	   //runs through the file and checks word with check to see if the word is in the dictionary 
         	   while(strcmp(check,"zulus") != 0){
+        	   //printf("%s", check);
         	       if(strcmp(word,check) == 0){
         	       valid = 1;
         	       //restarts back to the begining of the file for reading
         	       rewind(wordBank);
         	       break;
         	       }
-        	       fgets(check, strlen(word)+1, wordBank);
+        	       fscanf(wordBank, "%s", check);
         	   }
         	   //if you get through the whole dictionary without finding the word you can return that there is an error
         	   if(valid == 0){
@@ -59,13 +61,14 @@ int pB(char* sentence){
         }
         //lines 61 through 69 are the same code as in the pervious while however this is here for single words and the last word in a sentence
         rewind(wordBank);
-        fgets(check, strlen(word)+1, wordBank);
+        //printf("here");
+        fscanf(wordBank, "%s", check);
         while(strcmp(check,"zulus") != 0){
              if(strcmp(word,check) == 0){
              fclose(wordBank);
              return 1;
              }
-          fgets(check, strlen(word)+1, wordBank);
+          fscanf(wordBank, "%s", check);
         }
 
         fclose(wordBank);
