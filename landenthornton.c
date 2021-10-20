@@ -7,10 +7,9 @@
 //This keeps throwing a segmentation fault, currently trying to get that figured out.
 
 char* pA(){
-
-        char sentence[1000];
+        char* sentence = calloc(1000, sizeof(char));
         printf("Enter a sentence: ");
-        char get;
+        char get = 0;
         int i = 0;
         while(get != '\n'){
                 //printf("%s\n", sentence);
@@ -90,6 +89,7 @@ int main(){
         char* wrongWords = pB(sentence);
         printf("%s", wrongWords);
 
+        free(sentence);
         return 0;
 }
 */
