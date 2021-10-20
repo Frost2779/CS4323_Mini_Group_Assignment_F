@@ -70,9 +70,8 @@ void handleClientTraffic(struct socket_t* socket) {
         char string[MAX_TCP_BUFFER_SIZE];
         strcpy(string, buffer);
 
-        time_t t = time(NULL);
-        struct tm tm = *localtime(&t);
-
+        time_t cTime = time(NULL);
+        struct tm tm = *localtime(&cTime);
 
         char fileName[50];
         sprintf(fileName, "%d-%d-%d_%d.txt", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, rand());
@@ -146,6 +145,7 @@ struct messagePair_t {
 };
 
 static pthread_t pThreadId = -1;
+static pthread_cond_t threadConditionalSignal = PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t dataListLock;
 static struct linkedList_t* dataList;
 
@@ -158,22 +158,18 @@ void sendSentence(const char* sentence) {
     linkedListAppend(dataList, message);
     pthread_mutex_unlock(&dataListLock);
 
-    // Eventual waking of the thread here
+    pthread_cond_signal(&threadConditionalSignal);
 }
 
 static _Noreturn void* threadLoop(void* data) {
     dataList = mallocLinkedList();
 
     while(1) {
-        sleep(10);
-        // The thread will wake up here
-
         pthread_mutex_lock(&dataListLock);
         if(dataList->count == 0) {
-            pthread_mutex_unlock(&dataListLock);
-            continue;
+            // Sleep the thread until there is work
+            pthread_cond_wait(&threadConditionalSignal, &dataListLock);
         }
-
 
         struct socket_t* socket = createSocket(ADDRESS, PORT);
         connectSocket(socket, 5, 2);
