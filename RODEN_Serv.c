@@ -39,7 +39,7 @@ void * threadTask(void *arg) {
         printf("Handling Client on socket : %d\n", clientSocket->socketFD);
 
         // Receive from client what thread will be doing //
-        handleClientTraffic(clientSocket->socketFD);
+        handleClientTraffic(clientSocket);
     }
 }
 

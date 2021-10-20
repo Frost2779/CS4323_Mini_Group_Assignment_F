@@ -4,6 +4,8 @@
 #include <unistd.h>
 #include <ctype.h>
 #include <stddef.h>
+
+/*
 //WEIRD BUG THING: some inputs just dont want to work in any capacity in the function "sdf" for example and other random mashings of the keyboard but not all for some reason just dont even start the function at all and just get stuck in an infinite wait for some reason and i have no idea why
 //this takes in the sentence from the user and checks all of the words on the dictionary to see if the words can be okayed 
 int pB(char* sentence){
@@ -159,5 +161,4 @@ int main(){
 
 return 0;
 }
-
-
+*/

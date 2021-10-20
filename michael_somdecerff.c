@@ -2,6 +2,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <arpa/inet.h>
@@ -23,20 +24,65 @@
 // HandleClientTraffic.h
 //
 /////////////////////////////////////////////////////
-void handleClientTraffic(int socketFD) {
-    struct socket_t* socket = malloc(sizeof(struct socket_t));
-    *(int*)&socket->socketFD = socketFD;
-
+void handleClientTraffic(struct socket_t* socket) {
     char buffer[MAX_TCP_BUFFER_SIZE];
 
     bzero(buffer, MAX_TCP_BUFFER_SIZE);
     readSocket(socket, buffer);
 
     if(strstr(buffer, RETRIEVE_FILE_COMMAND) != NULL) {
-        // Get the file
+        bzero(buffer, MAX_TCP_BUFFER_SIZE);
+        readSocket(socket, buffer);
+
+        FILE* encryptedFile = fopen(buffer, "r");
+        if(encryptedFile == NULL) {
+            writeSocket(socket, ERROR_MSG);
+            freeSocket(socket);
+            return;
+        }
+
+        char key[20];
+        char string[MAX_TCP_BUFFER_SIZE];
+        char line[MAX_TCP_BUFFER_SIZE];
+
+        fgets(line, 20, encryptedFile);
+        strcpy(key, line);
+
+        bzero(line, MAX_TCP_BUFFER_SIZE);
+        fgets(line, MAX_TCP_BUFFER_SIZE, encryptedFile);
+        strcpy(string, line);
+
+        writeSocket(socket, key);
+        writeSocket(socket, string);
+
+        fclose(encryptedFile);
     }
     else if(strstr(buffer, SAVE_FILE_COMMAND) != NULL) {
-        // Read the key and sentence and save as a file
+        bzero(buffer, MAX_TCP_BUFFER_SIZE);
+        readSocket(socket, buffer);
+
+        char key[20];
+        strcpy(key, buffer);
+
+        bzero(buffer, MAX_TCP_BUFFER_SIZE);
+        readSocket(socket, buffer);
+
+        char string[MAX_TCP_BUFFER_SIZE];
+        strcpy(string, buffer);
+
+        time_t t = time(NULL);
+        struct tm tm = *localtime(&t);
+
+
+        char fileName[50];
+        sprintf(fileName, "%d-%d-%d_%d.txt", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, rand());
+        FILE* file = fopen(fileName, "r");
+
+        fprintf(file, "%s", key);
+        fprintf(file, "%s", string);
+
+        fclose(file);
+        writeSocket(socket, fileName);
     }
 
     freeSocket(socket);
@@ -258,8 +304,8 @@ void* linkedListPop(struct linkedList_t* list) {
 //
 /////////////////////////////////////////////////////
 #define LANGUAGE_SIZE 53
-#define ERROR -1
-#define MAX_MSG_SIZE 8192 - 64
+#define ERROR (-1)
+#define MAX_MSG_SIZE (8192 - 64)
 
 static int translateToInt(char ch) {
     int value = ERROR;
@@ -406,9 +452,10 @@ void connectSocket(const struct socket_t* socket, int maxRetryAttempt, float bac
         printf("Connecting to TCP server. Attempt %d...\n", i + 1);
         if (connect(socket->socketFD, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) != 0) {
             if(i != maxRetryAttempt) {
-                float backoff = backoffFactor * (i + 1);
+                float backoff = backoffFactor * (float)(i + 1);
                 printf("Failed to connect, backoff waiting %.2f seconds\n", backoff);
-                usleep(MILLISECONDS_PER_SECOND * backoff);
+                // For some reason usleep doesn't work here?
+                sleep(MILLISECONDS_PER_SECOND * backoff);
                 continue;
             }
             else {
