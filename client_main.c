@@ -85,28 +85,28 @@ int main(){
       char* badwords;
       printf("before while child\n");
       while(1){
-      printf("in while child\n");
-      memset(message, 0, sizeof(message));
-      read(fd2[0], message, sizeof(message));
-      printf("after read child %s\n", message);
-      if(strcmp(message,"-1") == 0){
-      printf("EXIT");
-      break;
-      }
-      else{
-      printf("IN ELSE");
-      badwords = pB(message);
-      printf("MESSAGE FROM pB:%s", badwords);
-      if(sizeof(badwords) != 0){
-      printf("after BAD write\n");
-      write(fd[1], badwords, sizeof(badwords));
-      printf("after write child bad\n");
-      }
-      else{
-      printf("after GOOD write\n");
-      write(fd[1], "All Words are Good", 18);
-      printf("after write child good\n");
-      }
+         printf("in while child\n");
+         memset(message, 0, sizeof(message));
+         read(fd2[0], message, sizeof(message));
+         printf("after read child %s\n", message);
+         if(strcmp(message,"-1") == 0){
+            printf("EXIT");
+            break;
+         }
+         else{
+            printf("IN ELSE");
+            badwords = pB(message);
+            printf("MESSAGE FROM pB:%s", badwords);
+         if(sizeof(badwords) != 0){
+            printf("after BAD write\n");
+            write(fd[1], badwords, sizeof(badwords));
+            printf("after write child bad\n");
+         }
+         else{
+            printf("after GOOD write\n");
+            write(fd[1], "All Words are Good", 18);
+            printf("after write child good\n");
+         }
       }
       printf("WHERE???????????????????");
       }
