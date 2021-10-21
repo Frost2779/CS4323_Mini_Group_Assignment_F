@@ -5,10 +5,10 @@ it is not from landen's pA because not using that still gets the issue
 will work through it tomorrow
 compiles and runs with all of the code and connects on Michaels side of the code
 at least on the file retrieve side because i cannot currently get passed line 89
-as mentioned. i will comment it out tomorrow when i get the issues fixed up with
-line 89 and with the prints that have been in there to debug it doesnt even get 
+as mentioned. i will comment it up tomorrow when i get the issues fixed up with
+line 89.with the prints that have been in there to debug it doesnt even get 
 to the conditionals so this code can work kinda as a test but its current progress
-for the night and will fix it up tomorrow maybe
+for the night and will fix it up tomorrow
 
 */
 
