@@ -299,7 +299,7 @@ void* linkedListPop(struct linkedList_t* list) {
 // Encryption.h
 //
 /////////////////////////////////////////////////////
-#define LANGUAGE_SIZE 53
+#define LANGUAGE_SIZE 54
 #define ERROR (-1)
 #define MAX_MSG_SIZE (8192 - 64)
 
@@ -314,6 +314,9 @@ static int translateToInt(char ch) {
     }
     else if(ch >= 'a' && ch <= 'z') {
         value = ch - 'a' + 27;
+    }
+    else if(ch == '.') {
+        value = 53;
     }
 
     assert(value != ERROR);
@@ -331,6 +334,9 @@ static char translateToChar(int value) {
     }
     else if(value >= 27 && value <= 52) {
         ch = (value - 27) + 'a';
+    }
+    else if(value == 53) {
+        ch = '.';
     }
 
     assert(ch != ERROR);
