@@ -3,90 +3,168 @@
 #include <string.h>
 #include <unistd.h>
 #include <ctype.h>
-#include "client.h"
 
 char* pA(){
-
-    char* sentence = malloc(sizeof(char) * 1000);
-    printf("Enter a sentence: ");
+	//Allocates memory for the message.
+    char* message = malloc(sizeof(char) * 1000);
+    printf("Enter a message: ");
     char get;
     int i = 0;
-	scanf("%c", &get);
+    scanf("%c", &get);
+	
+	//Accepts the message that the user entered.
     do{
-        sentence[i] = get;
+        message[i] = get;
         i++;
-		scanf("%c", &get);
+        scanf("%c", &get);
     }while(get != '\n');
-
-    //printf("1. Send data to server\n2. Recieve file from server\n3. Terminate\n");
-    return sentence;
-		
+	
+	//Prints the menu.
+    printf("1. Send data to server\n2. Recieve file from server\n3. Terminate\n");
+    return message;
 }
 
-char* pB(char* sentence){
-
+char** pB(char* message){
+	
+	//Opens the file containing the dictionary.
     FILE *wordBank;
     wordBank = fopen("dictionary.txt", "r");
-
-    //char* sentence;
-        
-    char word[1000];
-    char next = fgetc(wordBank);
-    char wrongWords[1000];
-
-    int stringL = strlen(sentence);
-
-    int valid = 0;
-
+	
+	//Creates an array to hold the wrong words.
+    char** wrongWords = malloc(sizeof(char*) * 100);
+    for(int i = 0; i < 100; i++){
+        wrongWords[i] = malloc(sizeof(char) * 50);
+    }
+	//Creates an array to hold all of the sentences in the message.
+    char** sentences = malloc(sizeof(char*) * 20);
+    for(int i = 0; i < 20; i++){
+        sentences[i] = malloc(sizeof(char) * 1000);
+    }
+    int stringL = strlen(message);
+    int lastPeriod = 0;
+    int numSentences = 0;
+	//Stores each sentence of the message separately in the "sentences" array.
     for(int i = 0; i < stringL; i++){
-		printf("iter %d\n", i);
-        if(strcmp(&sentence[i], " ") == 0){
-            strcpy(sentence, &sentence[i + 1]);
-            i = 0;
-
-            while(next != EOF){
-                printf("%c\n", next);
-				printf("%c\n", next);
-                char check[1000];
-                while(strcmp(&next, "\n") != 0){
-                    check[i] = next;
-                    next = fgetc(wordBank);
-                }
-
-                if(strcmp(word, check) == 0){
-                    valid = 1;
-                }
-                next = fgetc(wordBank);
-			}
-
-            if(valid != 1){
-                strcat(wrongWords, word);
-                strcat(wrongWords, " ");
+        if(message[i] == '.' || message[i] == '!' || message[i] =='?'){
+            int h = 0;
+            for(int j = lastPeriod; j <= i; j++){
+                sentences[numSentences][h] = message[j];
+                h++;
             }
-			valid = 0;
-        }
-        else{
-			char toAdd = tolower((unsigned char) sentence[i]);
-            strcat(word, &toAdd);
+            lastPeriod = i + 2;
+            numSentences++;
         }
     }
-
-    fclose(wordBank);
-    char* wrongWordsR;
-    strcpy(wrongWordsR, wrongWords);
-    return wrongWordsR;
 	
+	//Creates an array to hold all the words in the dictionary.
+	char** dictionary = malloc(sizeof(char*) * 58110);
+    for(int i = 0; i < 58110; i++){
+        dictionary[i] = malloc(sizeof(char) * 50);
+    }
+	
+	//Stores all the words in the dictionary in the "dictionary" array.
+    char next = fgetc(wordBank);
+    int h = 0;
+    int wordNum = 0;
+    while(next != EOF){
+        if(next != '\n'){
+            dictionary[wordNum][h] = next;
+            h++;
+        }
+        else{
+            wordNum++;
+            h = 0;
+        }
+        next = fgetc(wordBank);
+    }
+	
+	//Scans each sentence for invalid words.
+    int numWrongWords = 0;
+    for(int i = 0; i < numSentences; i++){
+		//Creates an array to hold each word in the current sentence.
+        char** words = malloc(sizeof(char*) * 100);
+        for(int j = 0; j < 100; j++){
+            words[j] = malloc(sizeof(char) * 50);
+        }
+        int numWords = 0;
+        int lastSpace = 0;
+        int sentenceL = strlen(sentences[i]);
+		//Converts all the words in the sentence to lowercase and stores them in the "words" array.
+        for(int j = 0; j < sentenceL; j++){
+            if(sentences[i][j] == ' ' || sentences[i][j] == '.' || sentences[i][j] == '!' || sentences[i][j] == '?' || sentences[i][j] == ';' || sentences[i][j] == ',' || sentences[i][j] == ':'){
+                int h = 0;
+                for(int k = lastSpace; k < j; k++){
+                    words[numWords][h] = tolower(sentences[i][k]);
+                    h++;
+                }
+                lastSpace = j + 1;
+                words[numWords][h] = '\0';
+                numWords++;
+            }
+        }
+
+		//Checks to see if all the words in the sentence are in the dictionary. If they are not, they are stored in the "wrongWords" array.
+        for(int j = 0; j < numWords; j++){
+            int valid = 0;
+            for(int k = 0; k < 58110; k++){
+                if(strcmp(words[j], dictionary[k]) == 0){
+                    valid = 1;
+                }
+            }
+			if(valid != 1){
+                wrongWords[numWrongWords] = words[j];
+				numWrongWords++;
+            }
+
+        }
+		
+		//Frees all of the strings in the "words" array that are not also stored in the "wrongWords" array.
+        for(int j = 0; j < 100; j++){
+            int dontFree = 0;
+            for(int k = 0; k < 100; k++){
+                if(strcmp(words[j], wrongWords[k]) == 0 && strcmp(words[j], "\0") != 0){
+                    dontFree = 1;
+                }
+            }
+            if(dontFree == 0){
+                free(words[j]);
+            }
+        }
+        free(words);
+    }
+	//Frees the memory from the "dictionary" array.
+    for(int i = 0; i < 58110; i++){
+        free(dictionary[i]);
+    }
+    free(dictionary);
+	
+	//Frees the memory from the "sentences" array.
+    for(int i = 0; i < 20; i++){
+        free(sentences[i]);
+    }
+    free(sentences);
+    fclose(wordBank);
+	//Returns the "wrongWords" array.
+    return wrongWords;
 }
 
-/*
+//This main function is just for testing purposes.
 int main(){
 
-    char* sentence = pA();
-	printf("Not yet");
-    char* wrongWords = pB(sentence);
-    printf("%s", wrongWords);
+    char* message = pA();
+        
+    char** wrongWords = pB(message);
+
+    for(int i = 0; i < 2; i++){
+        printf("%s\n", wrongWords[i]);
+    }
+
+    free(message);
+
+    for(int i = 0; i < 100; i++){
+        free(wrongWords[i]);
+    }
+    free(wrongWords);
 
     return 0;
-	
 }
-*/
