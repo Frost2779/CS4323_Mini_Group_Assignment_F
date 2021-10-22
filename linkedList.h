@@ -50,4 +50,25 @@ void linkedListAppend(struct linkedList_t* list, void* data);
  */
 void* linkedListPop(struct linkedList_t* list);
 
+/*
+ * Peeks at the data held in the head node of the linked list
+ *
+ * Parameters:
+ *     list -> the linked list to peek
+ * Returns:
+ *     A pointer to the data that was contained within the
+ *     head node if the list isn't empty. Returns NULL otherwise
+ */
+void* linkedListPeek(const struct linkedList_t* list);
+
+/*
+ * Frees an allocated linked list.
+ *
+ * Parameters:
+ *     list -> the linked list free
+ * Returns:
+ *     None
+ */
+void freeLinkedList(struct linkedList_t* list);
+
 #endif //CS4323_MINI_GROUP_ASSIGNMENT_F_LINKEDLIST_H

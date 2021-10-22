@@ -284,8 +284,9 @@ void* linkedListPop(struct linkedList_t* list) {
     }
 
     void* data = list->head->data;
+
     // Only 1 element in list
-    if(list->head->next == NULL) {
+    if(list->count == 1) {
         free(list->head);
         list->head = NULL;
         list->tail = NULL;
@@ -299,6 +300,35 @@ void* linkedListPop(struct linkedList_t* list) {
     list->count--;
 
     return data;
+}
+
+void* linkedListPeek(const struct linkedList_t* list) {
+    assert(list != NULL);
+
+    if(list->head == NULL) {
+        return NULL;
+    }
+    else {
+        return list->head->data;
+    }
+}
+
+void freeLinkedList(struct linkedList_t* list) {
+    assert(list != NULL);
+
+    if(list->count > 0) {
+        while (list->head != NULL) {
+            struct node_t *next = list->head->next;
+
+            free(list->head->data);
+            free(list->head);
+
+            list->head = next;
+        }
+    }
+
+    free(list);
+    list = NULL;
 }
 
 /////////////////////////////////////////////////////
