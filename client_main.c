@@ -13,16 +13,10 @@ ill check again for updates periodically throughout the day so i can finalize th
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
-#include "clientThread.h"
-#include "util.h"
 #include "client.h"
 #include "clientThread.h"
 #include "retrieveFile.h"
 
-#define SOCKET_EXIT "|exit|"
-#define ERROR_MSG "ERROR"
-#define RETRIEVE_FILE_COMMAND "|retrieve_file|"
-#define SAVE_FILE_COMMAND "|save_file|"
 int main(){
    int fd[2];
    int fd2[2];
