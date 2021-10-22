@@ -46,6 +46,7 @@ void handleClientTraffic(struct socket_t* socket) {
         char line[MAX_TCP_BUFFER_SIZE];
 
         fgets(line, 20, encryptedFile);
+        buffer[strcspn(buffer, "\n")] = 0;
         strcpy(key, line);
 
         bzero(line, MAX_TCP_BUFFER_SIZE);
@@ -74,7 +75,13 @@ void handleClientTraffic(struct socket_t* socket) {
         struct tm tm = *localtime(&cTime);
 
         char fileName[50];
+        // Generate a file name
         sprintf(fileName, "%d-%d-%d_%d.txt", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, rand());
+        while(access(fileName, F_OK) == 0) {
+            // If the file already exists, generate a new one until it doesn't
+            sprintf(fileName, "%d-%d-%d_%d.txt", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, rand());
+        }
+
         FILE* file = fopen(fileName, "r");
 
         fprintf(file, "%s", key);
