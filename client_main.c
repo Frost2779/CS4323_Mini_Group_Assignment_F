@@ -9,26 +9,15 @@ ill check again for updates periodically throughout the day so i can finalize th
 
 */
 
-#include <assert.h>
-#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
-#include <strings.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
 #include "clientThread.h"
-#include "encryption.h"
-#include "linkedList.h"
-#include "socketConnection.h"
 #include "util.h"
-#include <ctype.h>
-#include <stddef.h>
-#include "landenthornton.c"
-#include "michael_somdecerff.c"
-//#include "RODEN_Serv.c"
+#include "client.h"
+#include "clientThread.h"
+#include "retrieveFile.h"
 
 #define SOCKET_EXIT "|exit|"
 #define ERROR_MSG "ERROR"

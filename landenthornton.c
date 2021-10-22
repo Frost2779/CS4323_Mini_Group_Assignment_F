@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <ctype.h>
+#include "client.h"
 
 char* pA(){
 
@@ -77,6 +78,7 @@ char* pB(char* sentence){
 	
 }
 
+/*
 int main(){
 
     char* sentence = pA();
@@ -87,3 +89,4 @@ int main(){
     return 0;
 	
 }
+*/
