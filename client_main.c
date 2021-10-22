@@ -1,14 +1,11 @@
 /*
 
-For some reason the code stops after line 89 and goes back to the parent function
-it is not from landen's pA because not using that still gets the issue
-will work through it tomorrow
-compiles and runs with all of the code and connects on Michaels side of the code
-at least on the file retrieve side because i cannot currently get passed line 89
-as mentioned. i will comment it up tomorrow when i get the issues fixed up with
-line 89.with the prints that have been in there to debug it doesnt even get 
-to the conditionals so this code can work kinda as a test but its current progress
-for the night and will fix it up tomorrow
+The only issue now is that sometimes the data gets messed up being passed to and from Landen's functions.
+other than that the code works together.
+i will update it as updated code comes through.
+the code connects to all of Michaels and Landen's but once the issue with transition of the data gets fixed it
+should all come together.
+ill check again for updates periodically throughout the day so i can finalize this code
 
 */
 
@@ -40,8 +37,8 @@ for the night and will fix it up tomorrow
 int main(){
    int fd[2];
    int fd2[2];
-   char sentence[20] = "hello world";
-   char* recieveParent;
+   char* words;
+   char recieveParent[1000];
    char fileName[50];
    pipe(fd2);//parent to child communication
    pipe(fd);//child to parent communication
@@ -56,12 +53,14 @@ int main(){
       printf("1. add to file\n2. get file\n3. exit\n");
       scanf("%d", &menu);
       if(menu == 1){
-         //sentence = pA();
          printf("before write parent\n");
-         write(fd2[1], sentence, sizeof(sentence));
-         printf("before read parent\n");
-         read(fd[0], recieveParent, sizeof(recieveParent));
-         printf("after read parent\n");
+         words = pA();
+         write(fd2[1], &words, sizeof(words));
+         printf("After parent send\n");
+         //waiting for the read in the pipe that handles child -> parent communication 
+         read(fd[0], &recieveParent, sizeof(recieveParent));
+         printf("%s after read parent\n", recieveParent);
+         sendSentence(words);
       }
       else if(menu == 2){
          printf("Input the file name that you wish to get: ");
@@ -71,7 +70,7 @@ int main(){
       else{
          //this write will help to exit the program cleanly 
          write(fd2[1], "-1", 2);
-         break;
+         //break;
       }
       }
       //close the sides of the pipe that actually get used the first one being the the write for the parent -> child communication and the second being the read for the child -> parent communication  
@@ -83,32 +82,31 @@ int main(){
       close(fd[0]);
       char message[1000];
       char* badwords;
-      printf("before while child\n");
+      //printf("before while child\n");
       while(1){
-         printf("in while child\n");
+         //printf("in while child\n");
          memset(message, 0, sizeof(message));
-         read(fd2[0], message, sizeof(message));
-         printf("after read child %s\n", message);
+         //printf("PRE READ CHILD\n");
+         read(fd2[0], &message, sizeof(message));
+         //printf("POST 1 READ CHILD\n");
+         //printf("%s\n", message);
          if(strcmp(message,"-1") == 0){
             printf("EXIT");
-            break;
+            exit(0);
          }
          else{
-            printf("IN ELSE");
             badwords = pB(message);
+            //strcpy(message, badwords);
             printf("MESSAGE FROM pB:%s", badwords);
-         if(sizeof(badwords) != 0){
-            printf("after BAD write\n");
-            write(fd[1], badwords, sizeof(badwords));
-            printf("after write child bad\n");
+            if(sizeof(badwords) != 0){
+               printf("after BAD write\n");
+               write(fd[1], &badwords, sizeof(badwords));
+            }
+            else{
+               //printf("in good\n")
+               write(fd[1], "All Words are Good", 18);
+            }
          }
-         else{
-            printf("after GOOD write\n");
-            write(fd[1], "All Words are Good", 18);
-            printf("after write child good\n");
-         }
-      }
-      printf("WHERE???????????????????");
       }
       
    }
