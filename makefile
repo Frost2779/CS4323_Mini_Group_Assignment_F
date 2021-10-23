@@ -1,4 +1,4 @@
-all: client server testing
+all: client server
 
 client:
 	gcc -o client.out client_main.c landenthornton.c michael_somdecerff.c -pthread -std=c11
@@ -6,8 +6,6 @@ client:
 server:
 	gcc -o server.out RODEN_Serv.c landenthornton.c michael_somdecerff.c -pthread -std=c11
 
-testing:
-	gcc -o testing.out testing_main.c michael_somdecerff.c -pthread -std=c11
-
 clean:
 	rm *.out
+	rm 2021*.txt
