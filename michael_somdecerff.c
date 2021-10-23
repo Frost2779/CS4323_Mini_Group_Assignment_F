@@ -74,7 +74,7 @@ void handleClientTraffic(struct socket_t* socket) {
         time_t cTime = time(NULL);
         struct tm tm = *localtime(&cTime);
 
-        char fileName[50];
+        char fileName[60];
         // Generate a file name
         sprintf(fileName, "%d-%d-%d_%d.txt", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, rand());
         while(access(fileName, F_OK) == 0) {
@@ -82,7 +82,7 @@ void handleClientTraffic(struct socket_t* socket) {
             sprintf(fileName, "%d-%d-%d_%d.txt", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, rand());
         }
 
-        FILE* file = fopen(fileName, "r");
+        FILE* file = fopen(fileName, "w");
 
         fprintf(file, "%s", key);
         fprintf(file, "%s", string);
@@ -204,7 +204,7 @@ static _Noreturn void* threadLoop(void* data) {
             // Receive the file name
             bzero(buffer, MAX_TCP_BUFFER_SIZE);
             readSocket(socket, buffer);
-            printf("Sentence file name: %s\n", buffer);
+            printf("Sentence file name: '%s'\n", buffer);
 
             free(message->sentence);
             free(message);
