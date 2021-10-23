@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <ctype.h>
 #include "client.h"
 #include "clientThread.h"
 #include "retrieveFile.h"
@@ -116,7 +117,7 @@ int main() {
                     }
                         //makes the words
                     else {
-                        tempsentence[i] = message[x];
+                        tempsentence[i] = tolower(message[x]);
                         i++;
 
                     }
