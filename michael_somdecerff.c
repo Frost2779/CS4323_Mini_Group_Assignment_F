@@ -84,7 +84,7 @@ void handleClientTraffic(struct socket_t* socket) {
 
         FILE* file = fopen(fileName, "w");
 
-        fprintf(file, "%s", key);
+        fprintf(file, "%s\n", key);
         fprintf(file, "%s", string);
 
         fclose(file);
@@ -124,7 +124,7 @@ void retrieveFile(const char* fileName) {
     // Check if there was an error on the server
     if(strstr(buffer, ERROR_MSG) != NULL) {
         printf("Specified file '%s' does not exist\n", fileName);
-        exit(1);
+        return;
     }
 
     // parse the key to int
@@ -136,7 +136,7 @@ void retrieveFile(const char* fileName) {
 
     // print file contents
     char* decrypted = decrypt(buffer, key);
-    printf("Received file for name '%s':%s\n", fileName, decrypted);
+    printf("Received file contents for name '%s': %s\n", fileName, decrypted);
     free(decrypted);
 }
 
