@@ -1,14 +1,5 @@
 /*
 
-There is a warning in compilation which i am unsure about 
-because i use the same char** as landen does in his main 
-but i get "warning: assignment to ‘char **’ from incompatible pointer type ‘char *’"
-even with testing in landen's main the use of char** works fine
-
-other than that hopefully i can get together with landen to figure out 
-the multiple use issue and then apply the finishing touches and we 
-should be good to go completely
-
 */
 
 #include <stdlib.h>
@@ -36,47 +27,49 @@ int main(){
       //close the unneeded pipe sides so because you are not reading in pipe fd2 you close the read end and because you are not writing on the fd you close the write side. 
       close(fd2[0]);
       close(fd[1]);
+      //loop for the menu
       while(menu != 3){
+      //print the menu
       printf("1. add to file\n2. get file\n3. exit\n");
       scanf("%d", &menu);
+      //if else statements for menu handling
       if(menu == 1){
       askagain = 0;
+      //askagain and this while handle if you need to ask for the sentence to be fixed
         while(askagain == 0){
-         printf("before write parent\n");
-         //memset(words, 0, strlen(words));
          words = pA();
+         //sometimes pA() places a \n in front so this just makes sure that we can get rid of it
          if(words[0] == '\n'){
          strcpy(words, &words[1]);
          }
-         //strcpy(words, &words[1]);
-         printf("Before parent send %s\n", words);
+         //send the data to the child for checking
          write(fd2[1], words, strlen(words));
          
          //waiting for the read in the pipe that handles child -> parent communication 
          memset(recieveParent, 0, strlen(recieveParent));
          read(fd[0], recieveParent, sizeof(recieveParent));
-         //strcpy(tempsend, words);
-         printf("words: %s\n", words);
-         printf("%s after read parent\n", recieveParent);
+         //checks to make sure if the sentence is good 
          if(strcmp(recieveParent, "-1") == 0){
          sendSentence(words);
          askagain = 1;
          }
+         //prints the words that dont work and asks for a new sentence
          else{
-         printf("Please fix these words: %s", recieveParent);
+         printf("Words that need to be fixed:%s\n", recieveParent);
          }
          }
          
       }
+      //handles file retrieve
       else if(menu == 2){
          printf("Input the file name that you wish to get: ");
          scanf("%s", fileName);
          retrieveFile(fileName);
       }
+      //exit
       else{
          //this write will help to exit the program cleanly 
          write(fd2[1], "-1", 2);
-         //break;
       }
       }
       //close the sides of the pipe that actually get used the first one being the the write for the parent -> child communication and the second being the read for the child -> parent communication  
@@ -84,34 +77,54 @@ int main(){
       close(fd[0]);
    }
    else{
+   //closes the unneeded side of the pipe
       close(fd2[1]);
       close(fd[0]);
-      char message[1000];
-      char** badwords;
-      char fullBW[1000];
+      //strings for checking and sending
+      char message[1000] ;
+      char badwords[1020] = " ";
+      char fullBW[1000] = " ";
+      char tempsentence[1000] = " ";
+      //the placement for tempsentence
       int i = 0;
-      //printf("before while child\n");
+      //counts the amount of sentences
+      int sentcount;
+      //will keep looping until the user selects the exit option
       while(1){
-         //printf("in while child\n");
+      strcpy(fullBW, " ");
+      strcpy(tempsentence, " ");
+      strcpy(badwords, " ");
+      sentcount = 0;
          memset(message, 0, sizeof(message));
-         //printf("PRE READ CHILD\n");
          read(fd2[0], message, sizeof(message));
-         //printf("POST 1 READ CHILD\n");
-         printf("Message from Parent: %s\n", message);
+         //handles a clean exit
          if(strcmp(message,"-1") == 0 || strlen(message) == 0){
-            //printf("EXIT");
             exit(0);
          }
+         //works on the checking of the words
          else{
-            badwords = pB(message);
-            //only sending the first word that is in the array until we get pB figured out
-            printf("FIRST WORD FROM pB:%s", badwords[0]);
-            if(strlen(badwords[0]) != 0){
-               printf("after BAD write\n");
-               write(fd[1], badwords[0], strlen(badwords[0]));
+            //handles the sentence by sentence parsing and checking
+            for(int x = 0; x < strlen(message); x++){
+            //finds the end of sentences
+            if(message[x] == '.'){
+            pB(tempsentence, badwords);
+            strcpy(fullBW, badwords);
+            i = 0;
+            sentcount++;
+            memset(tempsentence, 0, strlen(tempsentence));
+            }
+            //makes the words
+            else{
+            tempsentence[i] = message[x];
+            i++;
+            
+            }
+            }
+            //checks to see if we need to send a error in sentence message or a string good message
+            if(strlen(badwords) > sentcount){
+               write(fd[1], badwords, strlen(badwords));
             }
             else{
-               printf("in good\n");
                write(fd[1], "-1", 2);
             }
          }
