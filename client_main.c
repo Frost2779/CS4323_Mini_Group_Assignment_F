@@ -122,7 +122,10 @@ int main() {
 
                     }
                 }
-                //checks to see if we need to send a error in sentence message or a string good message
+                if(sentcount == 0){
+                pB(message, badwords);
+                sentcount++;
+                }
                 if (strlen(badwords) > sentcount) {
                     write(fd[1], badwords, strlen(badwords));
                 } else {
