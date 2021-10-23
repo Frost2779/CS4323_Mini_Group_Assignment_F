@@ -1,11 +1,13 @@
 /*
 
-The only issue now is that sometimes the data gets messed up being passed to and from Landen's functions.
-other than that the code works together.
-i will update it as updated code comes through.
-the code connects to all of Michaels and Landen's but once the issue with transition of the data gets fixed it
-should all come together.
-ill check again for updates periodically throughout the day so i can finalize this code
+There is a warning in compilation which i am unsure about 
+because i use the same char** as landen does in his main 
+but i get "warning: assignment to ‘char **’ from incompatible pointer type ‘char *’"
+even with testing in landen's main the use of char** works fine
+
+other than that hopefully i can get together with landen to figure out 
+the multiple use issue and then apply the finishing touches and we 
+should be good to go completely
 
 */
 
@@ -21,8 +23,10 @@ int main(){
    int fd[2];
    int fd2[2];
    char* words;
+   char tempsend[1000];
    char recieveParent[1000];
    char fileName[50];
+   int askagain;
    pipe(fd2);//parent to child communication
    pipe(fd);//child to parent communication
    int menu = 0;
@@ -36,14 +40,33 @@ int main(){
       printf("1. add to file\n2. get file\n3. exit\n");
       scanf("%d", &menu);
       if(menu == 1){
+      askagain = 0;
+        while(askagain == 0){
          printf("before write parent\n");
+         //memset(words, 0, strlen(words));
          words = pA();
-         write(fd2[1], &words, sizeof(words));
-         printf("After parent send\n");
+         if(words[0] == '\n'){
+         strcpy(words, &words[1]);
+         }
+         //strcpy(words, &words[1]);
+         printf("Before parent send %s\n", words);
+         write(fd2[1], words, strlen(words));
+         
          //waiting for the read in the pipe that handles child -> parent communication 
-         read(fd[0], &recieveParent, sizeof(recieveParent));
+         memset(recieveParent, 0, strlen(recieveParent));
+         read(fd[0], recieveParent, sizeof(recieveParent));
+         //strcpy(tempsend, words);
+         printf("words: %s\n", words);
          printf("%s after read parent\n", recieveParent);
+         if(strcmp(recieveParent, "-1") == 0){
          sendSentence(words);
+         askagain = 1;
+         }
+         else{
+         printf("Please fix these words: %s", recieveParent);
+         }
+         }
+         
       }
       else if(menu == 2){
          printf("Input the file name that you wish to get: ");
@@ -64,30 +87,32 @@ int main(){
       close(fd2[1]);
       close(fd[0]);
       char message[1000];
-      char* badwords;
+      char** badwords;
+      char fullBW[1000];
+      int i = 0;
       //printf("before while child\n");
       while(1){
          //printf("in while child\n");
          memset(message, 0, sizeof(message));
          //printf("PRE READ CHILD\n");
-         read(fd2[0], &message, sizeof(message));
+         read(fd2[0], message, sizeof(message));
          //printf("POST 1 READ CHILD\n");
-         //printf("%s\n", message);
-         if(strcmp(message,"-1") == 0){
-            printf("EXIT");
+         printf("Message from Parent: %s\n", message);
+         if(strcmp(message,"-1") == 0 || strlen(message) == 0){
+            //printf("EXIT");
             exit(0);
          }
          else{
             badwords = pB(message);
-            //strcpy(message, badwords);
-            printf("MESSAGE FROM pB:%s", badwords);
-            if(sizeof(badwords) != 0){
+            //only sending the first word that is in the array until we get pB figured out
+            printf("FIRST WORD FROM pB:%s", badwords[0]);
+            if(strlen(badwords[0]) != 0){
                printf("after BAD write\n");
-               write(fd[1], &badwords, sizeof(badwords));
+               write(fd[1], badwords[0], strlen(badwords[0]));
             }
             else{
-               //printf("in good\n")
-               write(fd[1], "All Words are Good", 18);
+               printf("in good\n");
+               write(fd[1], "-1", 2);
             }
          }
       }
