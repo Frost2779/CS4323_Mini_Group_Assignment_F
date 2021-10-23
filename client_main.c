@@ -1,6 +1,3 @@
-/*
-
-*/
 
 #include <stdlib.h>
 #include <string.h>
@@ -55,6 +52,8 @@ int main() {
                     if (strcmp(recieveParent, "-1") == 0) {
                         sendSentence(words);
                         askagain = 1;
+                        //to help prevent mixing of output
+                        sleep(1);
                     }
                         //prints the words that dont work and asks for a new sentence
                     else {
