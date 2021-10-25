@@ -78,7 +78,6 @@ int main() {
             pthread_mutex_unlock(&queLock);            //unlock client que
         } else {                                       //If there is 3 Clients already connected, Send error message and close socket.
             printf("Max connections reached! closing incoming connection.\n");
-            writeSocket(clientSocket, "Server is currently Full!");
             freeSocket(clientSocket);
             numOfConnectedClients--;
         }
